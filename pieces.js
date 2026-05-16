@@ -134,10 +134,8 @@ class Pawn extends Piece{
         this.targetPositions = [];
         let direction = this.color === 'white' ? -8 : 8;
         let single = currentPosition + direction;
-        console.log(single, boardPieces[single])
         if (single >= 0 && single <= 63 && boardPieces[single] === null) {
             this.targetPositions.push(single);
-            console.log('pushing ', single)
         }
         if (!this.movedbefore) {
             let double = currentPosition + 2 * direction;
@@ -160,7 +158,7 @@ class Pawn extends Piece{
         let left = currentPosition + direction - 1;
         let right = currentPosition + direction + 1;
         let row = Math.floor(currentPosition/8);
-        let expectedRow = row - 1 ;
+        let expectedRow = this.color === 'white'? row - 1: row + 1;
         if(left >= 0 && left <= 63 && Math.floor(left/8) === expectedRow){ // checks if the left diagonal is a valid capture move
             this.takePositions.push(left);
         }
