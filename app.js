@@ -46,7 +46,10 @@ class gameBoard{
         for(let p= this.boardPieces.length-1; p>= 0; p--){
             flipedBoard.push(this.boardPieces[p]);
         }
-        console.log(flipedBoard)
+        this.boardPieces= flipedBoard;
+        this.boardDiv.forEach(sq=> sq.remove())
+        this.boardDiv= document.querySelector('#board'); //cuz it was an array
+        this.prepareBoard();
     }
     prepareBoard(){ //add colors and pieces etc
         this.boardPieces.forEach((piece, i) => {
@@ -280,11 +283,11 @@ class gameBoard{
 
     }
     changeTurn(){
+        this.flipBoard();
         const squares = document.querySelectorAll('.square');
         if(this.currentPlayer === 'white'){
             this.currentPlayer = 'black';
             this.player.innerText= 'Black';
-            this.flipBoard();
             if(this.checked)
                 if(this.isCheckMate()){
                     console.log('checkMAte');
@@ -299,7 +302,6 @@ class gameBoard{
         }else{
             this.currentPlayer = 'white';
             this.player.innerText= 'White';
-            this.flipBoard();
             if(this.checked)
                 if(this.isCheckMate()){
                     squares.forEach((square, i) => square.setAttribute('draggable', 'false'))
