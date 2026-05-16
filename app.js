@@ -394,13 +394,10 @@ class gameBoard{
         
     }
     canCastle(king){
-        console.log('in castle')
-        let whiteRooks= [56, 63];
-        let blackRooks= [0, 7];
-        let rookIdxes= [];
-        let empSqrs= [];
+        let rookIdxes= [56, 63];
         let kingIdx= this.boardPieces.indexOf(king);
         let rook;
+        let empSqrs= [];
 
         const checkEmptySqrs= ()=>{
             rookIdxes.some(idx=>{
@@ -444,16 +441,13 @@ class gameBoard{
             king.targetPositions.push(move);
             this.activeClickValidMoves.push(move);
         }
-
-        if(this.currentPlayer== 'white') rookIdxes= whiteRooks;
-        else rookIdxes= blackRooks
         
         rookIdxes = rookIdxes.filter(idx => this.boardPieces[idx]? !this.boardPieces[idx].movedbefore: false);
         if(rookIdxes.length== 0) return false; //if both rooks moved
         
         checkEmptySqrs(); //check for queen or king side
 
-        //check each square to know if it checks
+        //check each square to know if it under attack
         if(this.castleInfo.kingSide.length != 0){
             if(checkSafety(this.castleInfo.kingSide)) {
                 editKingMoves(kingIdx+ 2)
@@ -485,33 +479,17 @@ class gameBoard{
         this.boardPieces[kingIdx]= null;
 
         if(kingIdx < targetIndex){ //kingside
-            if(this.currentPlayer== 'white'){
-                this.boardPieces[targetIndex-1]= this.boardPieces[63]
-                this.boardPieces[targetIndex-1].movedbefore= true;
-                this.boardPieces[63]= null;
-                this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[63].innerHTML;
-                this.boardDiv[63].innerHTML= null;
-            }else{
-                this.boardPieces[targetIndex-1]= this.boardPieces[7]
-                this.boardPieces[targetIndex-1].movedbefore= true;
-                this.boardPieces[7]= null;
-                this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[7].innerHTML;
-                this.boardDiv[7].innerHTML= null;
-            }
+            this.boardPieces[targetIndex-1]= this.boardPieces[63] 
+            this.boardPieces[targetIndex-1].movedbefore= true;
+            this.boardPieces[63]= null;
+            this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[63].innerHTML;
+            this.boardDiv[63].innerHTML= null;
         }else{ //queen side
-            if(this.currentPlayer== 'white'){
-                this.boardPieces[targetIndex+ 1]= this.boardPieces[56]
-                this.boardPieces[targetIndex+1].movedbefore= true;
-                this.boardPieces[56]= null;
-                this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[56].innerHTML;
-                this.boardDiv[56].innerHTML= null;
-            }else{
-                this.boardPieces[targetIndex+ 1]= this.boardPieces[0]
-                this.boardPieces[targetIndex+1].movedbefore= true;
-                this.boardPieces[0]= null;
-                this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[0].innerHTML;
-                this.boardDiv[0].innerHTML= null;
-            }
+            this.boardPieces[targetIndex+ 1]= this.boardPieces[56]
+            this.boardPieces[targetIndex+ 1].movedbefore= true;
+            this.boardPieces[56]= null;
+            this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[56].innerHTML;
+            this.boardDiv[56].innerHTML= null;
         }
         this.updateDraggables();
         this.clearClickSelection();

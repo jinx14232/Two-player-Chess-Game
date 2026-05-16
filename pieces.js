@@ -21,9 +21,12 @@ class Piece{
             by: [],
             at: null
         };
-        boardPieces.some((chessPiece, i)=>{
-            if(!chessPiece || chessPiece.targetPositions.length == 0 || chessPiece.piece== 'king' || chessPiece.color== reqColor) return; // if null
+
+        boardPieces.some((chessPiece, i)=>{ //white
+            if(!chessPiece || chessPiece.piece== 'king' || chessPiece.color== reqColor) return; // if null
             let tempTargets= chessPiece.takeMove(i, boardPieces);
+            if(tempTargets.length== 0) return;
+            //console.log('targets of ', chessPiece.piece, ' color ', chessPiece.color, tempTargets)
             for(let j= 0; j< tempTargets.length; j++){
                 let target= tempTargets[j];
                 if(boardPieces[target] && boardPieces[target].piece == targetPiece && boardPieces[target].color== reqColor){
@@ -129,10 +132,13 @@ class Pawn extends Piece{
     }
     validMove(currentPosition, boardPieces){
         this.targetPositions = [];
-        let direction = this.color === 'white' ? -8 : 8;
+        //let direction = this.color === 'white' ? -8 : 8;
+        let direction = -8;
         let single = currentPosition + direction;
+        console.log(single, boardPieces[single])
         if (single >= 0 && single <= 63 && boardPieces[single] === null) {
             this.targetPositions.push(single);
+            console.log('pushing ', single)
         }
         if (!this.movedbefore) {
             let double = currentPosition + 2 * direction;
@@ -141,22 +147,20 @@ class Pawn extends Piece{
                 this.targetPositions.push(double);
             }
         }
+        let tP= this.takeMove(currentPosition, boardPieces);
+        tP.forEach(pos=>{
+            if(boardPieces[pos]? boardPieces[pos].color!= boardPieces[currentPosition].color: false)
+                this.targetPositions.push(pos);
+        })
         return this.targetPositions;
     }
     takeMove(currentPosition, boardPieces){
         this.takePositions= [];
-        let direction = this.color === 'white' ? -8 : 8;
+        let direction = -8;
         let left = currentPosition + direction - 1;
         let right = currentPosition + direction + 1;
         let row = Math.floor(currentPosition/8);
-        let expectedRow = this.color === 'white' ? row - 1 : row + 1;
-        // if(left >= 0 && left <= 63 && boardPieces[left] !== null && boardPieces[left].color !== this.color && Math.floor(left/8) === expectedRow){ // checks if the left diagonal is a valid capture move
-        //     diagonals.push(left);
-        // }
-
-        // if(right >= 0 && right <= 63 && boardPieces[right] !== null && boardPieces[right].color !== this.color && Math.floor(right/8) === expectedRow){// checks if the right diagonal is a valid capture move
-        //     diagonals.push(right);
-        // } 
+        let expectedRow = row - 1 ;
         if(left >= 0 && left <= 63 && Math.floor(left/8) === expectedRow){ // checks if the left diagonal is a valid capture move
             this.takePositions.push(left);
         }
