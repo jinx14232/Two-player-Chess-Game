@@ -50,6 +50,8 @@ class gameBoard{
         this.boardDiv.forEach(sq=> sq.remove())
         this.boardDiv= document.querySelector('#board'); //cuz it was an array
         this.prepareBoard();
+        this.dragAndDropFunctionality();
+        this.clickFunctionality();
     }
     prepareBoard(){ //add colors and pieces etc
         this.boardPieces.forEach((piece, i) => {
@@ -339,7 +341,7 @@ class gameBoard{
             }else {
                 this.pinned= false;
                 this.clearMsg();
-                return
+                //return
             }
         }
         
@@ -378,6 +380,7 @@ class gameBoard{
                 Number(this.selectedSquare.dataset.index), 
                 this.boardPieces
             );
+            console.log(this.boardPieces[this.selectedSquare.dataset.index])
             //adding castle moves
             if(internalPiece.piece== 'king' && !internalPiece.movedbefore && !this.checked){
                 this.canCastle(internalPiece);
