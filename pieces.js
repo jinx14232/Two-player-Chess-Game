@@ -132,8 +132,7 @@ class Pawn extends Piece{
     }
     validMove(currentPosition, boardPieces){
         this.targetPositions = [];
-        //let direction = this.color === 'white' ? -8 : 8;
-        let direction = -8;
+        let direction = this.color === 'white' ? -8 : 8;
         let single = currentPosition + direction;
         console.log(single, boardPieces[single])
         if (single >= 0 && single <= 63 && boardPieces[single] === null) {
@@ -157,7 +156,7 @@ class Pawn extends Piece{
 
     takeMove(currentPosition, boardPieces){
         this.takePositions= [];
-        let direction = -8;
+        let direction = this.color === 'white' ? -8 : 8;
         let left = currentPosition + direction - 1;
         let right = currentPosition + direction + 1;
         let row = Math.floor(currentPosition/8);

@@ -41,22 +41,6 @@ class gameBoard{
             new Rook('white'), new Knight('white'), new Bishop('white'), new Queen('white'), new King('white'), new Bishop('white'), new Knight('white'), new Rook('white')
         ];
     }
-    flipBoard(){
-        const flipedBoard= [];
-        for(let p= this.boardPieces.length-1; p>= 0; p--){
-            flipedBoard.push(this.boardPieces[p]);
-        }
-        if(this.check.at){
-            this.check.at= flipedBoard.indexOf(this.boardPieces[this.check.at]);
-        }
-        this.boardPieces= flipedBoard;
-        this.boardDiv.forEach(sq=> sq.remove())
-        this.boardDiv= document.querySelector('#board'); //cuz it was an array
-        this.prepareBoard();
-        if (this.check.at) this.markCheck(this.check);
-        this.dragAndDropFunctionality();
-        this.clickFunctionality();
-    }
     prepareBoard(){ //add colors and pieces etc
         this.boardPieces.forEach((piece, i) => {
             const square = document.createElement('div');
@@ -205,7 +189,6 @@ class gameBoard{
         this.gameMsg.innerText= msg;
     }
     changeTurn(){
-        this.flipBoard();
         const squares = document.querySelectorAll('.square');
         if(this.currentPlayer === 'white'){
             this.currentPlayer = 'black';
