@@ -218,7 +218,9 @@ class gameBoard{
         }
     }
     canCastle(king){
-        let rookIdxes= [56, 63];
+        let whiteRook= [56, 63];
+        let blackRook= [0, 7];
+        let rookIdxes= [];
         let kingIdx= this.boardPieces.indexOf(king);
         let rook;
         let empSqrs= [];
@@ -266,6 +268,8 @@ class gameBoard{
             this.activeClickValidMoves.push(move);
         }
         
+        rookIdxes= this.currentPlayer== 'white'? whiteRook: blackRook;
+
         rookIdxes = rookIdxes.filter(idx => this.boardPieces[idx]? !this.boardPieces[idx].movedbefore: false);
         if(rookIdxes.length== 0) return false; //if both rooks moved
         
