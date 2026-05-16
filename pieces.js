@@ -154,6 +154,7 @@ class Pawn extends Piece{
         })
         return this.targetPositions;
     }
+
     takeMove(currentPosition, boardPieces){
         this.takePositions= [];
         let direction = -8;
