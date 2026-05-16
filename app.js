@@ -307,17 +307,33 @@ class gameBoard{
         this.boardPieces[kingIdx]= null;
 
         if(kingIdx < targetIndex){ //kingside
-            this.boardPieces[targetIndex-1]= this.boardPieces[63] 
-            this.boardPieces[targetIndex-1].movedbefore= true;
-            this.boardPieces[63]= null;
-            this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[63].innerHTML;
-            this.boardDiv[63].innerHTML= null;
+            if(this.currentPlayer== 'white'){
+                this.boardPieces[targetIndex-1]= this.boardPieces[63] 
+                this.boardPieces[targetIndex-1].movedbefore= true;
+                this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[63].innerHTML;
+                this.boardDiv[63].innerHTML= null;
+                this.boardPieces[63]= null;
+            }else{
+                this.boardPieces[targetIndex-1]= this.boardPieces[7] 
+                this.boardPieces[targetIndex-1].movedbefore= true;
+                this.boardDiv[targetIndex-1].innerHTML= this.boardDiv[63].innerHTML;
+                this.boardDiv[7].innerHTML= null;
+                this.boardPieces[7]= null;
+            }
         }else{ //queen side
-            this.boardPieces[targetIndex+ 1]= this.boardPieces[56]
-            this.boardPieces[targetIndex+ 1].movedbefore= true;
-            this.boardPieces[56]= null;
-            this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[56].innerHTML;
-            this.boardDiv[56].innerHTML= null;
+            if(this.currentPlayer== 'white'){
+                this.boardPieces[targetIndex+ 1]= this.boardPieces[56]
+                this.boardPieces[targetIndex+ 1].movedbefore= true;
+                this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[56].innerHTML;
+                this.boardDiv[56].innerHTML= null;
+                this.boardPieces[56]= null;
+            }else {
+                this.boardPieces[targetIndex+ 1]= this.boardPieces[0]
+                this.boardPieces[targetIndex+ 1].movedbefore= true;
+                this.boardDiv[targetIndex+ 1].innerHTML= this.boardDiv[0].innerHTML;
+                this.boardDiv[0].innerHTML= null;
+                this.boardPieces[0]= null;
+            }
         }
         this.updateDraggables();
         this.clearClickSelection();
@@ -328,8 +344,6 @@ class gameBoard{
         }
 
     }
-
-
 
     movePiece = (source, target) => {
             const sourceIndex = Number(source.dataset.index);
@@ -443,7 +457,7 @@ class gameBoard{
             }else {
                 this.pinned= false;
                 this.clearMsg();
-                //return
+                return;
             }
         }
         
