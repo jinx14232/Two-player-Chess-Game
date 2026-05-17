@@ -1,19 +1,32 @@
 class gameBoard{
     constructor(boardDiv){
+
         console.log('new features');
+
         this.boardDiv = boardDiv;
-        this.boardPieces = this.createBoard(); //creates array of piece
+        this.squares= this.addSquares(); //boxes array
+
+        this.boardPieces = this.createPieces(); //creates array of internal pieces
+        
         this.promotePannel= document.querySelector('.promotion-overlay')
         this.player= document.querySelector('#player');
         this.status= document.querySelector('#status');
         this.gameMsg= document.querySelector('#msg');
+        this.promotionInfo= null;
+        
         this.currentPlayer = 'white';
         this.selectedSquare = null;
+        this.selectedPiece= null; //internal piece
+        this.selectedIndex= null;
+    
         this.activeMoveHandlers = [];
+
         this.activeClickValidMoves = [];
         this.activeClickTakeMoves = [];
+
         this.checked= false;
         this.pinned= false;
+        
         this.check= {
             by: [],
             at: null
@@ -23,15 +36,15 @@ class gameBoard{
             block: false,
             capture: false
         }
+
         this.castleInfo= {
             can: false,
             kingSide: [],
             queenSide: [],
-
         }
-        this.promotionInfo= null;
+
     }
-    createBoard(){
+    createPieces(){
         return [new Rook('black',), new Knight('black'), new Bishop('black'), new Queen('black'), new King('black'), new Bishop('black'), new Knight('black'), new Rook('black'),
             new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'), new Pawn('black'),
             null, null, null, null, null, null, null, null,
@@ -42,30 +55,50 @@ class gameBoard{
             new Rook('white'), new Knight('white'), new Bishop('white'), new Queen('white'), new King('white'), new Bishop('white'), new Knight('white'), new Rook('white')
         ];
     }
-    prepareBoard(){ //add colors and pieces etc
-        this.boardPieces.forEach((piece, i) => {
+    createFlippedPieces(){
+        const flipBoard= [];
+        for(let piece= this.boardPieces.length-1; piece>= 0; piece--){
+            flipBoard.push(this.boardPieces[piece]);
+        }
+        return flipBoard;
+    }
+    addSquares(){
+        const squares= [];
+        for(let i= 0; i<= 63; i++){
             const square = document.createElement('div');
-            square.setAttribute('data-index', i); // add data attribute to identify the square
+            square.setAttribute('data-index', i);
             square.classList.add('square');
-            const row = Math.floor((63 - i) / 8) + 1;
+            this.boardDiv.appendChild(square);
+            squares.push(square);
+        }
+        return squares;
+    }
+    renderBoard(){ 
+        //add colors and pieces etc
+        this.boardPieces.forEach((piece, idx) => {
+
+            const square= this.squares[idx];
+            square.innerHTML= '';
+
+            const row = Math.floor((63 - idx) / 8) + 1;
             if(row % 2 === 0){ // changes the color of the square based on the row and column
-                square.classList.add(i % 2 == 0 ? 'light' : 'dark');
+                square.classList.add(idx % 2 == 0 ? 'light' : 'dark');
             } else {
-                square.classList.add(i % 2 == 0 ? 'dark' : 'light');
+                square.classList.add(idx % 2 == 0 ? 'dark' : 'light');
             }
+
             if(piece){
                 square.innerHTML = piece.svg;
-                square.setAttribute('draggable', piece.color === 'white' ? 'true' : 'false'); // make pieces draggable
+                square.setAttribute('draggable', piece.color === this.currentPlayer ? 'true' : 'false'); // make pieces draggable
                 piece.color === 'white' ? square.firstChild.classList.add('white') : square.firstChild.classList.add('black');
             } else {
                 square.setAttribute('draggable', 'false');
             }
-            this.boardDiv.appendChild(square);
+
         });
 
-        this.boardDiv= Array.from(this.boardDiv.children);
     }
-
+    
     updateDraggables(){
         const squares= document.querySelectorAll('.square')
         squares.forEach(square => {
@@ -667,7 +700,7 @@ window.addEventListener('load', () => {
     const displayPlayer = document.getElementById('player');
     const chessBoard = new gameBoard(board);
     chessBoard.promotionEvents();
-    chessBoard.prepareBoard();
+    chessBoard.renderBoard();
     //chessBoard.reverseIndex();
     chessBoard.dragAndDropFunctionality();
     chessBoard.clickFunctionality();
