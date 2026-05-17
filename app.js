@@ -223,7 +223,6 @@ class gameBoard{
         this.gameMsg.innerText= msg;
     }
     changeTurn(){
-        const squares = document.querySelectorAll('.square');
         if(this.currentPlayer === 'white'){
             this.currentPlayer = 'black';
             this.player.innerText= 'Black';
@@ -234,7 +233,7 @@ class gameBoard{
                     return;
                 }
              
-            squares.forEach((square, i) => {
+            this.squares.forEach((square, i) => {
                 square.setAttribute('draggable', this.boardPieces[i] && this.boardPieces[i].color === 'black' ? 'true' : 'false');
             })
         
@@ -246,7 +245,7 @@ class gameBoard{
                     squares.forEach((square, i) => square.setAttribute('draggable', 'false'))
                     return;
                 }
-            squares.forEach((square, i) => {
+            this.squares.forEach((square, i) => {
                 square.setAttribute('draggable', this.boardPieces[i] && this.boardPieces[i].color === 'white' ? 'true' : 'false');
             })
         }
@@ -479,7 +478,8 @@ class gameBoard{
     selectPiece(block) {
         this.clearClickSelection();
         this.selectedSquare = block;
-        let internalPiece= this.boardPieces[Number(this.selectedSquare.dataset.index)]
+        this.selectedIndex= Number(this.selectedSquare.dataset.index)
+        this.selectedPiece= this.boardPieces[this.selectedIndex];
         this.selectedSquare.classList.add('dragging');
         
         // Check if piece is pinned (would expose king to check)
@@ -611,10 +611,11 @@ class gameBoard{
     }
 
     clickFunctionality(){
-        const squares = document.querySelectorAll('.square');
-        squares.forEach(square => {
+       
+        this.squares.forEach(square => {
             square.addEventListener('click', ()=>{
-                if(square.getAttribute('draggable') !== 'true' && !this.selectedSquare) return;
+
+                if(square.getAttribute('draggable') == 'false' && !this.selectedSquare) return;
                 // If a piece is already selected
                 if(this.selectedSquare){
                     // If clicking the selected square again, deselect
