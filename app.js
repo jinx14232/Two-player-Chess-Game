@@ -1,5 +1,6 @@
 class gameBoard{
     constructor(boardDiv){
+        console.log('new features');
         this.boardDiv = boardDiv;
         this.boardPieces = this.createBoard(); //creates array of piece
         this.promotePannel= document.querySelector('.promotion-overlay')
