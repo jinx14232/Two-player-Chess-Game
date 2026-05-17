@@ -9,8 +9,8 @@ class Piece{
     }
     takeMove(currrentPosition, boardPieces){
         this.takePositions= [];
-        const validPos= this.validMove(currrentPosition, boardPieces);
-        validPos.forEach(t=>{
+        //const validPos= this.validMove(currrentPosition, boardPieces);
+        this.targetPositions.forEach(t=>{
             if(boardPieces[t]) this.takePositions.push(t);
         })
         return this.takePositions;
