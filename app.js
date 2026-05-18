@@ -480,7 +480,7 @@ class gameBoard{
         }else{
             this.activeClickValidMoves= saveMoves;
             this.selectedPiece.targetPositions= this.activeClickValidMoves;
-            // this.activeClickTakeMoves = internalPiece.takeMove(currentPosition, this.boardPieces);
+            this.activeClickTakeMoves= this.selectedPiece.takeMove(this.selectedIndex, this.boardPieces).filter(move => saveMoves.includes(move));
             return false;
         }
     }
@@ -502,7 +502,7 @@ class gameBoard{
     captureChecker(){
         
         let takeMoves = this.selectedPiece.takeMove(this.selectedIndex, this.boardPieces);
-        if(takeMoves.length()== 0) return false;
+        if(takeMoves.length== 0) return false;
 
         //pos of who checks
         let checkPos = this.boardPieces.indexOf(this.check.by[0]);
@@ -513,16 +513,16 @@ class gameBoard{
     }
     blockChecker(){
         let validMoves = this.selectedPiece.validMove(this.selectedIndex, this.boardPieces);
-        if(validMoves.length()== 0) return null;
+        if(validMoves.length== 0) return null;
         
         let blockPositions = Piece.prototype.findBlockPositions(this.check, this.boardPieces);
-        if(blockPositions.length()== 0) return null;
+        if(blockPositions.length== 0) return null;
 
         validMoves = validMoves.filter(move => 
             blockPositions.includes(move)
         );
 
-        if(validMoves.length()== 0) return null;
+        if(validMoves.length== 0) return null;
         
         return validMoves;
 
@@ -539,9 +539,7 @@ class gameBoard{
         //         this.boardPieces
         //     );
         //     //adding castle moves
-        //     if(internalPiece.piece== 'king' && !internalPiece.movedbefore && !this.checked){
-        //         this.canCastle(internalPiece);
-        //     }
+        //     
         //     if(internalPiece.piece== 'king' && this.checked) this.fillGameMsg('', 'Can\'t castle! you are in check!');
 
         //     internalPiece.targetPositions= this.activeClickValidMoves; 
@@ -660,11 +658,14 @@ class gameBoard{
             let castleSqr= null;
             this.selectPiece(square) //set selected sq etc
             
-            if (!this.checked) {
-              if (this.checkPin()) {
+            if (!this.checked && this.selectedPiece.piece!= 'king') {
+                if (this.checkPin()) {
                 console.log("pinned");
+                this.activeClickTakeMoves= [];
+                this.activeClickValidMoves= [];
                 return;
               }
+              // if not pinned, valid and take moves are initialized
             }
 
             if(this.checked && this.selectedPiece.piece!= 'king'){
@@ -684,11 +685,22 @@ class gameBoard{
                 }
             }
 
+            if( this.selectedPiece.piece== 'king'){
+                this.activeClickValidMoves= this.selectedPiece.validMove(this.selectedIndex, this.boardPieces);
+                this.activeClickTakeMoves= this.selectedPiece.takeMove(this.selectedIndex, this.boardPieces);
+                
+                if(!internalPiece.movedbefore && !this.checked){
+                    this.canCastle(internalPiece);
+                }
             
+            }
+
+            if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) return;
+            console.log(this.activeClickTakeMoves, this.activeClickValidMoves);
             
             // Add drop-target class and handlers to valid moves
             this.activeClickValidMoves.forEach((moveIndex) => {
-                const targetSquare = this.boardDiv[moveIndex];
+                const targetSquare = this.squares[moveIndex];
                 if (this.activeClickTakeMoves.includes(moveIndex)) {
                     targetSquare.classList.add("capture-target");
                 }
