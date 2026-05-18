@@ -745,12 +745,9 @@ class gameBoard{
                     if(!this.castleInfo.can) return;
 
                     if(this.checkEmptySquares()){
-                        
+
                     }
-
-
                 }
-            
             }
 
             if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) return;
