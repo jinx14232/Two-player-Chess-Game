@@ -428,6 +428,7 @@ class gameBoard{
         //queen side
         if(this.boardPieces[rookIdxes[0]].movedbefore || !this.boardPieces[rookIdxes[0]] ) this.castleInfo.queenSide= null;
         else this.castleInfo.queenSide= 58;
+
         //king side
         if(this.boardPieces[rookIdxes[1]].movedbefore) this.castleInfo.kingSide= null;
         else this.castleInfo.kingSide= 62;
@@ -435,7 +436,40 @@ class gameBoard{
         if(!this.castleInfo.kingSide && !this.castleInfo.queenSide) this.castleInfo.can= false;
         else this.castleInfo.can= true;
 
+    }
+    checkEmptySquares(rookIdx){
 
+        let allow= true;
+        const kingIdx= this.selectedIndex;
+        const emptySqrs= Piece.prototype.getPathBetween(kingIdx, rookIdx);
+        
+        if(emptySqrs.length== 0) return false;
+
+        emptySqrs.some(sq=>{
+            if(this.boardPieces[sq]){
+                allow= false;
+                return true;
+            }
+        })
+
+        //if no empty squares
+        if(!allow) return allow;
+
+        //checking if any empty square is attacked
+        this.boardPieces.some(piece=>{
+            if(!piece || piece.color== this.currentPlayer) return;
+            let validMoves= piece.validMove(this.boardPieces.indexOf(piece), this.boardPieces);
+            validMoves.some(move=>{
+                if(emptySqrs.includes(move)){
+                    allow= false;
+                    return true;
+                }
+            })
+            if(!allow) return true;
+        })
+
+        return allow;
+        
     }
     canCastle(king){
         let whiteRook= [56, 63];
@@ -709,6 +743,10 @@ class gameBoard{
                     
                     this.rookStatus(); //fill king and queen side
                     if(!this.castleInfo.can) return;
+
+                    if(this.checkEmptySquares()){
+                        
+                    }
 
 
                 }
