@@ -498,39 +498,36 @@ class gameBoard{
                 return false;
             }
         }
-    }
+    }   
+    captureChecker(){
         
-    moveablePiece(){
-        
-        let validMoves = this.selectedPiece.validMove(this.selectedIndex, this.boardPieces);
-        if(validMoves== 0) return false;
+        let takeMoves = this.selectedPiece.takeMove(this.selectedIndex, this.boardPieces);
+        if(takeMoves.length()== 0) return false;
 
         //pos of who checks
         let checkPos = this.boardPieces.indexOf(this.check.by[0]);
-        let blockPositions = Piece.prototype.findBlockPositions(this.check, this.boardPieces);
-   
+        
+        if(takeMoves.includes(checkPos)) return checkPos;
+        else return null;
 
     }
-        // // When in check and selecting non-king piece
-        // if (this.checked && internalPiece.piece !== 'king') {
-            
-        //     // Get all valid moves for the piece
-                
-        //     // Filter to only capture of checking piece or block moves
-        //     // by [0] cuz we can capture when only single piece checks us
-                 
-        //     this.activeClickValidMoves = validMoves.filter(move => 
-        //         move === checkPos || blockPositions.includes(move)
-        //     );
-        //     internalPiece.targetPositions= this.activeClickValidMoves; 
+    blockChecker(){
+        let validMoves = this.selectedPiece.validMove(this.selectedIndex, this.boardPieces);
+        if(validMoves.length()== 0) return null;
+        
+        let blockPositions = Piece.prototype.findBlockPositions(this.check, this.boardPieces);
+        if(blockPositions.length()== 0) return null;
 
-        //     if(this.activeClickValidMoves.length== 0) this.fillMsg(`Can't move this ${internalPiece.piece} in check!`);
-        //     else this.fillMsg(`This ${internalPiece.piece} can only block check!`);
-            
-        //     this.activeClickTakeMoves = this.activeClickValidMoves.filter(move => move === checkPos);
-        //     if(this.activeClickTakeMoves.length != 0) this.fillMsg(`This ${internalPiece.piece} can only capture ${this.check.by[0].piece}!`);
-        //     internalPiece.takePositions= this.activeClickTakeMoves;
-            
+        validMoves = validMoves.filter(move => 
+            blockPositions.includes(move)
+        );
+
+        if(validMoves.length()== 0) return null;
+        
+        return validMoves;
+
+    }
+
         // } else {
         //     // Normal piece selection (king or not in check)
         //     this.activeClickValidMoves = internalPiece.validMove(
@@ -662,15 +659,31 @@ class gameBoard{
 
             let castleSqr= null;
             this.selectPiece(square) //set selected sq etc
-
-            if(this.checkPin()){
-                console.log('pinned');
+            
+            if (!this.checked) {
+              if (this.checkPin()) {
+                console.log("pinned");
                 return;
+              }
             }
 
             if(this.checked && this.selectedPiece.piece!= 'king'){
-                this.moveablePiece();
+                //check if piece can capture checker
+                const checkerPos= this.captureChecker();
+                if(checkerPos!= null){
+                    this.activeClickTakeMoves.push(checkerPos);
+                    this.activeClickValidMoves.push(checkerPos);
+                    this.selectedPiece.targetPositions.push(checkerPos);
+                    this.selectedPiece.takePositions.push(checkerPos);
+                }
+                //check if piece can block checker
+                const validMoves= this.blockChecker();
+                if(validMoves!= null){
+                    this.activeClickValidMoves= this.activeClickValidMoves.concat(validMoves);
+                    this.selectedPiece.targetPositions= this.selectedPiece.targetPositions.concat(validMoves);
+                }
             }
+
             
             
             // Add drop-target class and handlers to valid moves
