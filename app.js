@@ -37,11 +37,6 @@ class gameBoard{
             capture: false
         }
 
-        // this.castleInfo= {
-        //     can: false,
-        //     kingSide: {kingIdx: null, rookIdx: null}, 
-        //     queenSide: {kingIdx: null, rookIdx: null}
-        // }
         this.castleInfo= {
             kingSide: {rookMoved: false, save: false, kingIdx: null, rookIdx: null}, 
             queenSide: {rookMoved: false, save: false, kingIdx: null, rookIdx: null}
@@ -161,19 +156,6 @@ class gameBoard{
             element.removeEventListener('click', handler);
         });
         this.activeMoveHandlers = [];
-        // this.activeClickValidMoves.forEach(i => {
-        //     if(this.boardDiv[i]) {
-        //         this.boardDiv[i].classList.remove('drop-target');
-        //         this.boardDiv[i].classList.remove('castle');
-        //     }
-        // });
-        // this.activeClickTakeMoves.forEach(i => {
-        //     if(this.boardDiv[i]){
-        //         this.boardDiv[i].classList.remove('capture-target');
-        //     }
-        // });
-        // this.activeClickValidMoves = [];
-        // this.activeClickTakeMoves = [];
     }
     clearMsg(){
         this.status.innerText= '';
@@ -192,30 +174,13 @@ class gameBoard{
             this.player.innerText= 'Black';
             this.flipPieces();
             this.renderBoard();
-            // if(this.checked)
-            //     if(this.isCheckMate()){
-            //         console.log('checkMAte');
-            //         squares.forEach((square, i) => square.setAttribute('draggable', 'false'))
-            //         return;
-            //     }
-             
-            // this.squares.forEach((square, i) => {
-            //     square.setAttribute('draggable', this.boardPieces[i] && this.boardPieces[i].color === 'black' ? 'true' : 'false');
-            // })
+           
         
         }else{
             this.currentPlayer = 'white';
             this.player.innerText= 'White';
             this.flipPieces();
             this.renderBoard();
-            // if(this.checked)
-            //     if(this.isCheckMate()){
-            //         squares.forEach((square, i) => square.setAttribute('draggable', 'false'))
-            //         return;
-            //     }
-            // this.squares.forEach((square, i) => {
-            //     square.setAttribute('draggable', this.boardPieces[i] && this.boardPieces[i].color === 'white' ? 'true' : 'false');
-            // })
 
         }
     }
@@ -254,14 +219,14 @@ class gameBoard{
 
             if (!this.boardPieces[targetIndex].movedbefore)
                 this.boardPieces[targetIndex].movedbefore = true;
-            // if(this.boardPieces[targetIndex].piece== 'pawn' && ((targetIndex>= 0 && targetIndex<= 7))){
-            //     this.promotionInfo= {
-            //         sourceIdx: sourceIndex,
-            //         targetIdx: targetIndex,
-            //         piece: null //promote to piece
-            //     }
-            //     this.openPannel();
-            // }
+            if(this.boardPieces[targetIndex].piece== 'pawn' && ((targetIndex>= 0 && targetIndex<= 7))){
+                this.promotionInfo= {
+                    sourceIdx: sourceIndex,
+                    targetIdx: targetIndex,
+                    piece: null //promote to piece
+                }
+                this.openPannel();
+            }
     };
     
     markCheck(check){
@@ -423,25 +388,6 @@ class gameBoard{
         
     }
 
-        // } else {
-        //     // Normal piece selection (king or not in check)
-        //     this.activeClickValidMoves = internalPiece.validMove(
-        //         Number(this.selectedSquare.dataset.index), 
-        //         this.boardPieces
-        //     );
-        //     this.activeClickTakeMoves = internalPiece.takeMove(
-        //         Number(this.selectedSquare.dataset.index), 
-        //         this.boardPieces
-        //     );
-        //     //adding castle moves
-        //     
-        //     if(internalPiece.piece== 'king' && this.checked) this.fillGameMsg('', 'Can\'t castle! you are in check!');
-
-        //     internalPiece.targetPositions= this.activeClickValidMoves; 
-        //     internalPiece.takePositions= this.activeClickTakeMoves;
-
-        // }
-
     rookStatus(rookIdx){
 
         //check if rooks are in position and not moved before
@@ -508,86 +454,11 @@ class gameBoard{
         this.selectedIndex= null;
 
     }
-
-
-    // canCastle(king){
-    //     let whiteRook= [56, 63];
-    //     let blackRook= [0, 7];
-    //     let rookIdxes= [];
-    //     let kingIdx= this.boardPieces.indexOf(king);
-    //     let rook;
-    //     let empSqrs= [];
-
-    //     const checkEmptySqrs= ()=>{
-    //         rookIdxes.some(idx=>{
-    //             let allow= true;
-    //             let sqrs= Piece.prototype.getPathBetween(kingIdx, idx)
-    //             if(idx> kingIdx){ //king side
-    //                 sqrs.some(sq=>{
-    //                     if(this.boardPieces[sq]) { allow= false; return true }
-    //                 })
-    //                 if(allow) this.castleInfo.kingSide= sqrs;
-    //             }
-    //             else {//queenside
-    //                 sqrs.some(sq=>{
-    //                     if(this.boardPieces[sq]) {allow= false; return true}
-    //                 })
-    //                 if(allow) this.castleInfo.queenSide= sqrs;
-    //             }
-    
-    //         })
-    //     }
-    //     const checkSafety= (moves)=>{
-    //         console.log('king side moves', moves)
-    //         let save= true;
-    //         this.boardPieces.some((piece, cP)=>{
-    //             if(piece? piece.color== this.currentPlayer : true) return;
-    //             save= true;
-    //             let temp= piece.validMove(cP, this.boardPieces);
-    //             moves.some(move=> {
-    //                 if(temp.includes(move)){
-    //                     save= false;
-    //                     console.log(piece.piece, ' targets at ', move)
-    //                     return true;
-    //                 }
-    //             })
-    //             if(!save) return true;
-    //         })
-    //         if(save) return true;
-    //         else return false;
-    //     }
-    //     const editKingMoves= (move)=> {
-    //         king.targetPositions.push(move);
-    //         this.activeClickValidMoves.push(move);
-    //     }
-        
-    //     rookIdxes= this.currentPlayer== 'white'? whiteRook: blackRook;
-
-    //     rookIdxes = rookIdxes.filter(idx => this.boardPieces[idx]? !this.boardPieces[idx].movedbefore: false);
-    //     if(rookIdxes.length== 0) return false; //if both rooks moved
-        
-    //     checkEmptySqrs(); //check for queen or king side
-
-    //     //check each square to know if it under attack
-    //     if(this.castleInfo.kingSide.length != 0){
-    //         if(checkSafety(this.castleInfo.kingSide)) {
-    //             editKingMoves(kingIdx+ 2)
-    //             this.castleInfo.kingSide= [kingIdx+ 2]
-    //         }
-    //         else this.castleInfo.kingSide= []; //cant castle
-    //     }
-    //     if(this.castleInfo.queenSide.length != 0){
-    //         if(checkSafety(this.castleInfo.queenSide)) {
-    //             editKingMoves(kingIdx- 2)
-    //             this.castleInfo.queenSide= [kingIdx- 2]
-    //         }
-    //         else this.castleInfo.queenSide= []; //cant castle
-    //     }
-        
-    //     if(this.castleInfo.kingSide.length!= 0 || this.castleInfo.queenSide.length!= 0) 
-    //         this.castleInfo.can= true;
-        
-    // }
+    clearSelection= ()=>{
+            this.clearMovesFormatting();
+            this.clearSelections();
+            this.clearClickSelection();
+    }
 
     castle(king, target){
         console.log('castle square', target)
@@ -629,125 +500,19 @@ class gameBoard{
 
     }
     
-    dragAndDropFunctionality(){
-        let draggedHtml = null;
-        let castleSqr= null;
-        const squares = document.querySelectorAll('.square');
-        squares.forEach(block => {
-            block.addEventListener('dragstart', (e) => {
-                
-                if (block.getAttribute('draggable') !== 'true') return;
-                
-                this.selectPiece(block);
-                
-                if (this.activeClickValidMoves.length === 0)
-                    return;
-                
-                draggedHtml = block.innerHTML;
-                
-                this.activeClickValidMoves.forEach((moveIndex) => {
-                    const targetSquare = this.boardDiv[moveIndex];
-                    if (this.activeClickTakeMoves.includes(moveIndex)) {
-                        targetSquare.classList.add("capture-target");
-                    } else if(this.castleInfo.kingSide.includes(moveIndex) || this.castleInfo.queenSide.includes(moveIndex)){
-                        castleSqr= targetSquare;
-                        castleSqr.classList.add("castle");
-                    }
-                    else 
-                        targetSquare.classList.add("drop-target");
-                });
-               
-                e.dataTransfer.setData('text/plain', this.selectedSquare.dataset.index);
-                e.dataTransfer.effectAllowed = 'move';               
-                
-            });
-
-            block.addEventListener('dragend', () => {
-                this.clearClickSelection();
-                this.clearMsg();
-            });
-
-            block.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                if (this.selectedSquare && this.activeClickValidMoves.includes(Number(block.dataset.index))== false && block !== this.selectedSquare) {
-                    block.classList.add('wrong-drop-target');
-                }
-            });
-
-            block.addEventListener('dragleave', () => {
-                block.classList.remove('wrong-drop-target');
-
-            });
-
-            block.addEventListener('drop', (e) => {
-                e.preventDefault();
-                if(!this.activeClickValidMoves.includes(Number(block.dataset.index))) {
-                    block.classList.remove('wrong-drop-target');
-                    return;
-                }
-                if(castleSqr== block && castleSqr!= null){
-                    this.castle(this.selectedSquare, block);
-                }else
-                    this.movePiece(this.selectedSquare, block);
-                this.changeTurn();
-            });
-        });
-    }
-
-    clickFunctionality(){
-       
-        this.squares.forEach(square => {
-            square.addEventListener('click', ()=>{
-
-                if(square.getAttribute('draggable') == 'false' && !this.selectedSquare) return;
-                                
-                // If a piece is already selected
-                if(this.selectedSquare){
-        
-                    // If clicking the selected square again, deselect
-                    if(square === this.selectedSquare ){ 
-                        clearSelection();
-                        if(!this.checked) this.clearMsg()
-                        return;
-                    }
-                    //if click any draggable square, replace
-                    if(square.getAttribute('draggable') === 'true'){
-                        clearSelection();
-                        selectPiece(square);  
-                        return;
-                    }
-                    // If capture square
-                    if(this.activeClickValidMoves.includes(Number(square.dataset.index))){
-                        console.log('take move')
-                        return;
-                    }
-                    if(square.getAttribute('draggable') === 'false'){
-                        clearSelection();
-                        return;
-                    }
-                    
-                }else {
-                    // Select the piece
-                    selectPiece(square);
-                }
-            });
-        });
-        const selectPiece = (square) => {
-
-            let castleSqr= null;
-            this.selectPiece(square) //set selected sq etc
-            
-            if (!this.checked && this.selectedPiece.piece!= 'king') {
-                if (this.checkPin()) {
+    checkBind(){
+        if (!this.checked && this.selectedPiece.piece!= 'king') {
+            if (this.checkPin()) {
                 console.log("pinned");
-                clearSelection();
-                return;
-              }
-              // if not pinned, valid and take moves are initialized
+                this.clearSelection();
+                return true; //pinned, all moves expose check
             }
-
-            if(this.checked && this.selectedPiece.piece!= 'king'){
+              // if not pinned, valid and take moves are initialized
+        }
+        return false;
+    }
+    captureOrBlock(){
+        if(this.checked && this.selectedPiece.piece!= 'king'){
                 //check if piece can capture checker
                 const checkerPos= this.captureChecker();
                 if(checkerPos!= null){
@@ -765,8 +530,9 @@ class gameBoard{
                     this.selectedPiece.targetPositions= this.activeClickValidMoves;
                 }
             }
-
-            if(this.selectedPiece.piece== 'king'){
+    }
+    addCastleMoves(){
+        if(this.selectedPiece.piece== 'king'){
                 
                 if(!this.selectedPiece.movedbefore && !this.checked){
                     console.log('checking castle')
@@ -795,6 +561,131 @@ class gameBoard{
 
                 }
             }
+    }
+
+    dragAndDropFunctionality(){
+       let castleSqr= null;
+        this.squares.forEach(block => {
+            block.addEventListener('dragstart', (e) => {
+                
+                if (block.getAttribute('draggable') == 'false') return;
+                
+                this.selectPiece(block);
+                if (this.checkBind()) return; //if pinned, return and dont show any moves
+                this.captureOrBlock(); 
+                this.addCastleMoves();
+
+                if (this.activeClickValidMoves.length === 0 && this.activeClickTakeMoves.length === 0)
+                    return;
+                
+                this.activeClickValidMoves.forEach((moveIndex) => {
+                    const targetSquare = this.squares[moveIndex];
+                    if (this.activeClickTakeMoves.includes(moveIndex)) {
+                        targetSquare.classList.add("capture-target");
+                    } else if(this.selectedPiece.piece== 'king' && (this.castleInfo.kingSide.kingIdx== moveIndex || this.castleInfo.queenSide.kingIdx== moveIndex)){
+                        castleSqr= targetSquare;
+                        castleSqr.classList.add("castle");
+                    }
+                    else 
+                        targetSquare.classList.add("drop-target");
+                });
+               
+                e.dataTransfer.setData('text/plain', this.selectedSquare.dataset.index);
+                e.dataTransfer.effectAllowed = 'move';               
+                
+            });
+
+            block.addEventListener('dragend', () => {
+                console.log('drag end')
+                this.clearSelection();
+                this.clearMsg();
+            });
+
+            block.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+
+                if (this.selectedSquare && this.activeClickValidMoves.includes(Number(block.dataset.index))== false && block !== this.selectedSquare) {
+                    block.classList.add('wrong-drop-target');
+                }
+
+            });
+
+            block.addEventListener('dragleave', () => {
+                block.classList.remove('wrong-drop-target');
+
+            });
+
+            block.addEventListener('drop', (e) => {
+                e.preventDefault();
+ console.log('drop')
+                //if drop on invalid square, do nothing
+                if(!this.activeClickValidMoves.includes(Number(block.dataset.index))) {
+                    block.classList.remove('wrong-drop-target');
+                    //this.clearSelection();
+                    return;
+                }
+
+                if(castleSqr== block && castleSqr!= null)
+                    this.castle(this.selectedSquare, castleSqr);
+                else
+                    this.movePiece(this.selectedSquare, block);
+
+                if(this.kingChecks(this.selectedPiece)) this.markCheck(this.check);
+                //this.clearSelection();
+                this.changeTurn();
+
+            });
+        });
+    }
+
+    clickFunctionality(){
+       
+        this.squares.forEach(square => {
+            square.addEventListener('click', ()=>{
+
+                if(square.getAttribute('draggable') == 'false' && !this.selectedSquare) return;
+                                
+                // If a piece is already selected
+                if(this.selectedSquare){
+        
+                    // If clicking the selected square again, deselect
+                    if(square === this.selectedSquare ){ 
+                        this.clearSelection();
+                        if(!this.checked) this.clearMsg()
+                        return;
+                    }
+                    //if click any draggable square, replace
+                    if(square.getAttribute('draggable') === 'true'){
+                        clearSelection();
+                        selectPiece(square);  
+                        return;
+                    }
+                    // If capture square
+                    if(this.activeClickValidMoves.includes(Number(square.dataset.index))){
+                        console.log('take move')
+                        return;
+                    }
+                    if(square.getAttribute('draggable') === 'false'){
+                        clearSelection();
+                        return;
+                    }
+                    
+                }else {
+                    // Select the piece
+                    selectPiece(square);
+                }
+            });
+        });
+        const selectPiece = (square) => {
+
+            let castleSqr= null;
+
+            this.selectPiece(square) //set selected sq etc
+            
+            if (this.checkBind()) return; //if pinned, return and dont show any moves
+            this.captureOrBlock(); 
+            this.addCastleMoves();
 
             if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) return;
             
@@ -815,7 +706,8 @@ class gameBoard{
                 if(castleSqr){
                     const handler = () => {
                         this.castle(this.selectedSquare, castleSqr);
-                        clearSelection();
+                        if(this.kingChecks(this.selectedPiece)) this.markCheck(this.check);
+                        this.clearSelection();
                         this.fillGameMsg('Castled!', `${this.currentPlayer} has castled`);
                         this.changeTurn();
                     }
@@ -827,7 +719,7 @@ class gameBoard{
                     const handler = () => {
                         this.movePiece(this.selectedSquare, targetSquare);
                         if(this.kingChecks(this.selectedPiece)) this.markCheck(this.check);
-                        clearSelection();
+                        this.clearSelection();
                         this.changeTurn();
                     }
                     targetSquare.addEventListener("click", handler);
@@ -836,11 +728,6 @@ class gameBoard{
                 
           });
         };
-        const clearSelection= ()=>{
-            this.clearMovesFormatting();
-            this.clearSelections();
-            this.clearClickSelection();
-        }
 
     }
 
