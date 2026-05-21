@@ -146,6 +146,7 @@ class gameBoard{
                     this.boardPieces[this.promotionInfo.targetIdx]= new Knight(currentColor);
                     target.innerHTML= option.innerHTML;
                 }
+                this.fillGameMsg('Promoted', `${currentColor} pawn promoted to ${this.promotionInfo.piece}`);
                 this.closePannel();
                 this.resetCheck();
                 let check = Piece.prototype.checkForCheck(this.boardPieces, 'king', this.currentPlayer); //return piece that checked
@@ -219,7 +220,46 @@ class gameBoard{
         this.gameMsg.innerText= msg;
     }
 
+    resetCastleInfo(){
+        this.castleInfo = {
+            kingSide: {rookMoved: false, save: false, kingIdx: null, rookIdx: null},
+            queenSide: {rookMoved: false, save: false, kingIdx: null, rookIdx: null}
+        };
+    }
 
+    updateSelectionMessage(){
+        if(this.pinned){
+            this.fillGameMsg('Pinned!', `Can not move this ${this.selectedPiece.piece}`);
+            return;
+        }
+
+        if(this.checked){
+            if(this.activeClickValidMoves.length === 0 && this.activeClickTakeMoves.length === 0){
+                this.fillGameMsg('Check!', `Can not move this ${this.selectedPiece.piece} in check`);
+                return;
+            }
+
+            const checkerPos = this.boardPieces.indexOf(this.check.by[0]);
+            const canCaptureChecker = this.activeClickTakeMoves.includes(checkerPos);
+            const blockPositions = Piece.prototype.findBlockPositions(this.check, this.boardPieces);
+            const canBlock = blockPositions.some(pos => this.activeClickValidMoves.includes(pos));
+
+            if(canCaptureChecker || canBlock){
+                this.fillGameMsg('Check!', 'Only attacker can be captured or block.');
+                return;
+            }
+        }
+
+        if(this.castleInfo.kingSide.save || this.castleInfo.queenSide.save){
+            const sides = [];
+            if(this.castleInfo.kingSide.save) sides.push('king');
+            if(this.castleInfo.queenSide.save) sides.push('queen');
+            this.fillGameMsg('', `You can castle on ${sides.join(' or ')} side${sides.length > 1 ? 's' : ''}`);
+            return;
+        }
+
+        this.clearMsg();
+    }
 
     changeTurn(){
         this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
@@ -333,6 +373,7 @@ class gameBoard{
     selectPiece(block) {
 
         if(this.selectedSquare) this.clearSelection();
+        this.resetCastleInfo();
         this.selectedSquare = block;
         this.selectedIndex= Number(this.selectedSquare.dataset.index)
         this.selectedPiece= this.boardPieces[this.selectedIndex];
@@ -382,10 +423,10 @@ class gameBoard{
     rookStatus(rookIdx){
 
         //check if rooks are in position and not moved before
-        if( this.boardPieces[rookIdx]? this.boardPieces[rookIdx].piece !== 'rook' || this.boardPieces[rookIdx].color !== this.currentPlayer || this.boardPieces[rookIdx].movedbefore : true) 
-            return false;
+        if( this.boardPieces[rookIdx]? this.boardPieces[rookIdx].piece == 'rook' && this.boardPieces[rookIdx].color == this.currentPlayer && !this.boardPieces[rookIdx].movedbefore : false) 
+            return true;
 
-        return true; 
+        return false; 
 
     }
     checkEmptySquares(rookIdx){
@@ -400,7 +441,7 @@ class gameBoard{
         })
 
         //if no empty squares
-        if(emptySqrs.length== 0) return false;
+        if(emptySqrs.length!= path.length) return false;
 
         //checking if any empty square is attacked
         let allow= true;
@@ -463,7 +504,7 @@ class gameBoard{
             if (this.isPinned()) {
                 this.pinned= true;
                 this.selectedSquare.classList.add('bind');
-                this.fillGameMsg('Pinned!', `Moving this ${this.selectedPiece.piece} will lead to expose check!`)
+                this.fillGameMsg('Pinned!', `Can not move this ${this.selectedPiece.piece}`)
                 this.clearClickSelection();
                 return true; //pinned, all moves expose check
             }else{
@@ -536,45 +577,75 @@ class gameBoard{
             }
     }
     addCastleMoves(){
-        if(this.selectedPiece.piece== 'king'){
-                
-                if(!this.selectedPiece.movedbefore && !this.checked){
 
-                    //king side rook
-                    this.castleInfo.kingSide.rookMoved= this.rookStatus(this.currentPlayer== 'white'? 63: 56)? false: true;
+        if (this.selectedPiece.piece == "king") {
 
-                    //queen side rook
-                    this.castleInfo.queenSide.rookMoved= this.rookStatus(this.currentPlayer== 'white'? 56: 63)? false: true; 
-                    
-                    //if kingside rook is not moved and empty squares between king and rook and those squares are not attacked, then can castle king side
-                    this.castleInfo.kingSide.save= this.checkEmptySquares(this.currentPlayer== 'white'? 63: 56);
-                    if(!this.castleInfo.kingSide.rookMoved && this.castleInfo.kingSide.save){
-                        this.castleInfo.kingSide.kingIdx= this.currentPlayer== 'white'? 62: 57;
-                        this.castleInfo.kingSide.rookIdx= this.currentPlayer== 'white'? 61: 58;
-                        this.activeClickValidMoves.push(this.castleInfo.kingSide.kingIdx);
-                    }
-                    //if queenside rook is not moved and empty squares between king and rook and those squares are not attacked, then can castle queen side
-                    this.castleInfo.queenSide.save= this.checkEmptySquares(this.currentPlayer== 'white'? 56: 63);
-                    if(!this.castleInfo.queenSide.rookMoved && this.castleInfo.queenSide.save){
-                        this.castleInfo.queenSide.kingIdx= this.currentPlayer== 'white'? 58: 61;
-                        this.castleInfo.queenSide.rookIdx= this.currentPlayer== 'white'? 59: 60;
-                        this.activeClickValidMoves.push(this.castleInfo.queenSide.kingIdx);
-                    }
+          if (!this.selectedPiece.movedbefore && !this.checked) {
+            //king side rook
+            this.castleInfo.kingSide.rookMoved = this.rookStatus(
+              this.currentPlayer == "white" ? 63 : 56
+            )
+              ? false
+              : true;
 
-                }
+            //queen side rook
+            this.castleInfo.queenSide.rookMoved = this.rookStatus(
+              this.currentPlayer == "white" ? 56 : 63,
+            )
+              ? false
+              : true;
+
+            //if kingside rook is not moved and empty squares between king and rook and those squares are not attacked, then can castle king side
+            this.castleInfo.kingSide.save = this.checkEmptySquares(
+              this.currentPlayer == "white" ? 63 : 56,
+            );
+            if (
+              !this.castleInfo.kingSide.rookMoved &&
+              this.castleInfo.kingSide.save
+            ) {
+              this.castleInfo.kingSide.kingIdx =
+                this.currentPlayer == "white" ? 62 : 57;
+              this.castleInfo.kingSide.rookIdx =
+                this.currentPlayer == "white" ? 61 : 58;
+              this.activeClickValidMoves.push(this.castleInfo.kingSide.kingIdx);
             }
+            //if queenside rook is not moved and empty squares between king and rook and those squares are not attacked, then can castle queen side
+            this.castleInfo.queenSide.save = this.checkEmptySquares(
+              this.currentPlayer == "white" ? 56 : 63,
+            );
+            if (
+              !this.castleInfo.queenSide.rookMoved &&
+              this.castleInfo.queenSide.save
+            ) {
+              this.castleInfo.queenSide.kingIdx =
+                this.currentPlayer == "white" ? 58 : 61;
+              this.castleInfo.queenSide.rookIdx =
+                this.currentPlayer == "white" ? 59 : 60;
+              this.activeClickValidMoves.push(
+                this.castleInfo.queenSide.kingIdx,
+              );
+            }
+          }
+          console.log(this.castleInfo)
+
+        }
     }
 
     dragAndDropFunctionality(){
         this.squares.forEach(block => {
             block.addEventListener('dragstart', (e) => {
                 
-                if (block.getAttribute('draggable') == 'false') return;
-                
+                if (block.getAttribute('draggable') == 'false') 
+                    return;
                 this.selectPiece(block);
+
+                if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) 
+                    return;
+                
                 if (this.checkBind()) return; //if pinned, return and dont show any moves
                 this.captureOrBlock(); 
                 this.addCastleMoves();
+                this.updateSelectionMessage();
 
                 if (this.activeClickValidMoves.length === 0 && this.activeClickTakeMoves.length === 0)
                     return;
@@ -627,9 +698,12 @@ class gameBoard{
 
                 const droppedIndex = Number(block.dataset.index);
                 const isCastleMove = this.selectedPiece?.piece == 'king' && (droppedIndex === this.castleInfo.kingSide.kingIdx || droppedIndex === this.castleInfo.queenSide.kingIdx);
-                if(isCastleMove)
+                if(isCastleMove){
+                    const castleSide = droppedIndex === this.castleInfo.kingSide.kingIdx ? 'king' : 'queen';
+                    const currentColor = this.currentPlayer;
                     this.castle(this.selectedSquare, block);
-                else
+                    this.fillGameMsg('Castled', `${currentColor} castled ${castleSide} side`);
+                } else
                     this.movePiece(this.selectedSquare, block);
 
                 this.resetCheck();
@@ -681,11 +755,11 @@ class gameBoard{
         const selectPiece = (square) => {
 
             this.selectPiece(square) //set selected sq etc
-            if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) return;
             
             if (this.checkBind()) return; //if pinned, return and dont show any moves
             this.captureOrBlock(); 
             this.addCastleMoves();
+            this.updateSelectionMessage();
 
             if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) return;
             
@@ -704,18 +778,23 @@ class gameBoard{
                 
                 if(isCastleMove){
                     const handler = () => {
+                        const castleSide = moveIndex === this.castleInfo.kingSide.kingIdx ? 'king' : 'queen';
+                        const currentColor = this.currentPlayer;
                         this.castle(this.selectedSquare, targetSquare);
                         this.resetCheck();
                         //if(this.kingChecks(this.selectedPiece)) this.markCheck(this.check);
                         this.check= Piece.prototype.checkForCheck(this.boardPieces, 'king', this.currentPlayer== 'white'? 'black': 'white'); //update check info after move
                         if(this.check.at != null) this.markCheck(this.check);
                         this.clearSelection();
-                        this.fillGameMsg('Castled!', `${this.currentPlayer} has castled`);
+                        this.fillGameMsg('Castled', `${currentColor} castled ${castleSide} side`);
                         this.changeTurn();
                     }
                     targetSquare.addEventListener("click", handler);
                     this.activeMoveHandlers.push({ element: targetSquare, handler });
-                    this.fillGameMsg('', 'You can Castle');
+                    const sides = [];
+                    if(this.castleInfo.kingSide.save) sides.push('king');
+                    if(this.castleInfo.queenSide.save) sides.push('queen');
+                    this.fillGameMsg('', `You can castle on ${sides.join(' or ')} side${sides.length > 1 ? 's' : ''}`);
                 }else{
 
                     const handler = () => {
