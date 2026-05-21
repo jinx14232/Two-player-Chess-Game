@@ -36,10 +36,10 @@ body{
     overflow: visible;
 }
 
-.square img{
+.square .currentSvg{
     position: absolute;
     width: 50px;
-    bottom: -50px;
+    bottom: -3px;
     z-index: 1;
 }
 
@@ -187,7 +187,9 @@ path{
 .square.dragging {
     opacity: 0.5;
 }
-
+.square.shadow {
+    opacity: 0.5;
+}
 .square.drop-target::after {
   content: "";
   position: absolute;

@@ -94,9 +94,7 @@ class gameBoard{
             }
 
             if(piece){
-                 square.innerHTML = piece.svg;
-
-                // piece.color== this.currentPlayer? square.innerHTML = piece.currentImg : square.innerHTML = piece.svg;
+                square.innerHTML= piece.color== this.currentPlayer? piece.currentSvg : piece.svg;
                 square.setAttribute('draggable', piece.color === this.currentPlayer ? 'true' : 'false'); // make pieces draggable
                 piece.color === 'white' ? square.firstChild.classList.add('white') : square.firstChild.classList.add('black');
             } else {
@@ -495,8 +493,6 @@ class gameBoard{
             this.boardPieces[rookIdx]= null;
             this.selectedPiece= this.boardPieces[rookIdx]
         }
-    
-
     }
     
     checkBind(){
@@ -641,7 +637,7 @@ class gameBoard{
 
                 if(this.activeClickTakeMoves.length== 0 && this.activeClickValidMoves.length== 0) 
                     return;
-                
+
                 if (this.checkBind()) return; //if pinned, return and dont show any moves
                 this.captureOrBlock(); 
                 this.addCastleMoves();
