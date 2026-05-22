@@ -12,6 +12,7 @@ class Piece{
         this.currentSvg= `<div class="piece ${this.color} currentSvg" piece="${this.piece}" >${this.currentPieceSvg}</div>`;
         
     }
+
     takeMove(currrentPosition, boardPieces){
         this.takePositions= [];
         //const validPos= this.validMove(currrentPosition, boardPieces);
@@ -19,38 +20,93 @@ class Piece{
             if(boardPieces[t]) this.takePositions.push(t);
         })
         return this.takePositions;
-        
     }
-    checkForCheck(boardPieces, targetPiece, targetColor){
-        console.log('in check for check, looking for ', targetPiece, ' of color ', targetColor)
+
+    underAttack(boardPieces, checkColor, checkIdx){
+        let underAttack= false;
+
+        boardPieces.forEach((chessPiece, i)=>{
+            if(!chessPiece || chessPiece.color== checkColor || chessPiece.piece== 'king') return;
+            
+            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
+            if(tempTargets.length== 0) return;
+
+            if(tempTargets.includes(checkIdx)) underAttack= true;
+        })
+
+        return underAttack;
+    }
+    // Attacked(boardPieces, checkColor, checkIdx){
+    //     let attackedBy= [];
+
+    //     boardPieces.forEach((chessPiece, i)=>{
+    //         if(!chessPiece || chessPiece.color== checkColor || chessPiece.piece== 'king' ) return;
+            
+    //         let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
+    //         if(tempTargets.length== 0) return;
+
+    //         if(tempTargets.includes(checkIdx)) attackedBy.push(chessPiece);
+    //     })
+
+    //     return attackedBy;
+    // }
+    checkPin(boardPieces, king, kingColor){
+        
+        let attacked= false;
+
+        boardPieces.some((chessPiece, i)=>{ //white
+
+            if(!chessPiece || chessPiece.piece== 'king' || chessPiece.color== kingColor) return; // if null
+            
+            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
+            if(tempTargets.length== 0) return;
+            
+            tempTargets.some(target=>{
+                if(boardPieces[target] && boardPieces[target].piece == king && boardPieces[target].color== kingColor){
+                    attacked= true;
+                    return true;
+                }
+            })
+
+            if(attacked) return true;
+
+        })
+        return attacked;
+    }
+
+    checkForCheck(boardPieces, king, kingColor){
         let check= {
             by: [],
             at: null
         };
-
+        console.log('checking for check on ', king, ' of color ', kingColor);
         boardPieces.forEach((chessPiece, i)=>{ //white
 
-            if(!chessPiece || chessPiece.piece== 'king' || chessPiece.color==targetColor) return; // if null
-            let tempTargets= chessPiece.validMove(i, boardPieces); //filling target positions for each piece
-            tempTargets= chessPiece.takeMove(i, boardPieces) //then converting them into take positions if any
-
+            if(!chessPiece || chessPiece.piece== 'king' || chessPiece.color==kingColor) return; // if null
+            
+            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
             if(tempTargets.length== 0) return;
-
-
+            console.log('checking piece ', chessPiece.piece, 'of color ', chessPiece.color, ' at ', i, ' with targets ', tempTargets);
             for(let j= 0; j< tempTargets.length; j++){
                 let target= tempTargets[j];
-                if(boardPieces[target] && boardPieces[target].piece == targetPiece && boardPieces[target].color== targetColor){
+                if(boardPieces[target] && boardPieces[target].piece == king && boardPieces[target].color== kingColor){
                     check.by.push(chessPiece);
                     check.at= target;
                 }
             }
-        })
 
+        })
         return check;
     }
+
+
+
+
     findBlockPositions(checkInfo, boardPieces) {
         // Returns squares where a piece can block the check
         let blockSquares = [];
+        if (checkInfo.by.length > 1) return blockSquares;
+
         let checkedBy = checkInfo.by[0]; // Only ranged pieces can be blocked
         let kingPos = checkInfo.at;
         
@@ -90,53 +146,55 @@ class Piece{
         return path;
     }
 
-    captureChecker(checkedbys, boardPieces) {
-        let captureInfo = [];
-        let capturePiece
-        checkedbys.forEach(checkedby => {
-            capturePiece = checkedby.piece;
-            let captureAt = boardPieces.indexOf(checkedby);
-            let reqColor = checkedby.color;
-            captureInfo= (this.checkForCheck(boardPieces, capturePiece, reqColor).by);
-        });
-        return captureInfo;
-    }
-    escapeCheck(checkInfo, boardPieces){
-        let savemoves= [];
-        let cPosition= checkInfo.at; // index
-        let king= boardPieces[cPosition];
-        let checkedBy= checkInfo.by; //piece
-        let possibleMoves= King.prototype.validMove(cPosition, boardPieces).filter(t => {
-            return boardPieces[t] == null || boardPieces[t].color != king.color;
-        });
-        possibleMoves.forEach(move=>{
-            //internally placing king there
-            let orgPiece= boardPieces[move]; 
-            boardPieces[move]= king;
-            boardPieces[cPosition]= null;
+    // captureChecker(checkedbys, boardPieces) {
+    //     let captureInfo = [];
+    //     let capturePiece;
 
-            let dangMoves= this.checkForCheck(boardPieces, 'king', king.color);
-            if(dangMoves.at){
-                console.log('will check at ', dangMoves.at, ' by ', dangMoves.by);
-                // don't add to savemoves
-            } else {
-                savemoves.push(move);
-            }
-            boardPieces[move]= orgPiece;
-        })
-        boardPieces[cPosition]= king;
-        if(savemoves.length== 0) 
-            return false;
-        else 
-            return savemoves;
+    //     checkedbys.forEach(checkedby => {
+    //         capturePiece = checkedby.piece;
+    //         let captureAt = boardPieces.indexOf(checkedby);
+    //         let reqColor = checkedby.color;
+    //         captureInfo= (this.checkForCheck(boardPieces, capturePiece, reqColor).by);
+    //     });
 
-    }
+    //     return captureInfo;
+    // }
+//     escapeCheck(checkInfo, boardPieces){
+       
+//         let savemoves= [];
+//         let KingPosition= checkInfo.at; // index
+//         let king= boardPieces[KingPosition];
+//         let checkedBy= checkInfo.by; //piece
+        
+//         let possibleMoves= King.prototype.validMove(KingPosition, boardPieces);
 
-}
+//         possibleMoves.forEach(move=>{
+//             //internally placing king there
+//             let orgPiece= boardPieces[move]; 
+//             boardPieces[move]= king;
+//             boardPieces[KingPosition]= null;
+
+//             let dangMoves= this.checkForCheck(boardPieces, 'king', king.color);
+//             if(dangMoves.at){
+//                 console.log('will check at ', dangMoves.at, ' by ', dangMoves.by);
+//                 // don't add to savemoves
+//             } else {
+//                 savemoves.push(move);
+//             }
+//             boardPieces[move]= orgPiece;
+//         })
+//         boardPieces[KingPosition]= king;
+//         if(savemoves.length== 0) 
+//             return false;
+//         else 
+//             return savemoves;
+
+//     }
+ }
 
 class Pawn extends Piece{
     constructor(color){
-        super(color, 'pawn','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M320 32C386.3 32 440 85.7 440 152C440 179 431.1 203.9 416 224C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288L405.3 288L432 448L488.2 518.3C493.2 524.6 496 532.4 496 540.5C496 560.1 480.1 576 460.5 576L179.5 576C159.9 576 144 560.1 144 540.5C144 532.4 146.7 524.6 151.8 518.3L208 448L234.7 288L224 288C206.3 288 192 273.7 192 256C192 238.3 206.3 224 224 224C208.9 203.9 200 179 200 152C200 85.7 253.7 32 320 32z"/></svg>', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="50" height="60">
+        super(color, 'pawn','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M320 32C386.3 32 440 85.7 440 152C440 179 431.1 203.9 416 224C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288L405.3 288L432 448L488.2 518.3C493.2 524.6 496 532.4 496 540.5C496 560.1 480.1 576 460.5 576L179.5 576C159.9 576 144 560.1 144 540.5C144 532.4 146.7 524.6 151.8 518.3L208 448L234.7 288L224 288C206.3 288 192 273.7 192 256C192 238.3 206.3 224 224 224C208.9 203.9 200 179 200 152C200 85.7 253.7 32 320 32z"/></svg>', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="50" height="50">
   <g fill="color">
     <circle cx="50" cy="20" r="14"/>
     <ellipse cx="50" cy="40" rx="10" ry="5"/>
@@ -171,13 +229,13 @@ class Pawn extends Piece{
         return this.targetPositions;
     }
 
-    takeMove(currentPosition, boardPieces){
+    takeMove(currentPosition, boardPieces, flipped= false){
         this.takePositions= [];
-        let direction = -8;
+        let direction = flipped? 8: -8;
         let left = currentPosition + direction - 1;
         let right = currentPosition + direction + 1;
         let row = Math.floor(currentPosition/8);
-        let expectedRow = row - 1;
+        let expectedRow = flipped ? row + 1 : row - 1;
         if(left >= 0 && left <= 63 && Math.floor(left/8) === expectedRow){ // checks if the left diagonal is a valid capture move
             this.takePositions.push(left);
         }
@@ -491,37 +549,38 @@ fill="color" stroke="none">
     validMove(currentPosition, boardPieces){
         //cp -1, cp+1, 
         this.targetPositions= [];
-        let targets= [currentPosition+ 1, currentPosition- 1,
-                         (currentPosition+ 8), (currentPosition+ 8)+ 1, (currentPosition+ 8)- 1,
-                         (currentPosition- 8), (currentPosition- 8)+ 1, (currentPosition- 8)- 1
-                        ]
-        targets.forEach(target=>{
-            if(target>= 0 && target<= 63){
-                if(boardPieces[target]!= null){
-                    if(boardPieces[target].color== this.color) return;
-                    this.targetPositions.push(target)
-                    return;
-                }
+        let targets= [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+
+        let row= Math.floor(currentPosition/ 8)
+        let col= currentPosition% 8;
+        targets.forEach(([tr, tc])=>{
+            let tRow= row+ tr;
+            let tCol= col+ tc; 
+            if(tRow >= 0 && tRow < 8 && tCol >= 0 && tCol < 8 ){
+                let target= tRow * 8 + tCol;
+                if(boardPieces[target]? boardPieces[target].color== this.color : false) return;
+                if(this.underAttack(boardPieces, this.color, target)) return;
                 this.targetPositions.push(target)
             }
         })
-        let king= boardPieces[currentPosition];
 
-        this.targetPositions= this.targetPositions.filter(pos=>{
-            let orgPiece= boardPieces[pos]; 
-            boardPieces[pos]= king;
-            boardPieces[currentPosition]= null;
-            let dangMoves= this.checkForCheck(boardPieces, 'king', this.color);
-            if(dangMoves.at){
-                console.log('will check at ', dangMoves.at, ' by ', dangMoves.by.piece);
-                // don't add to savemoves
-            } else {
-                boardPieces[pos]= orgPiece;
-                return pos;
-            }
-            boardPieces[pos]= orgPiece;
-        })
-        boardPieces[currentPosition]= king;
+        // let king= boardPieces[currentPosition];
+
+        // this.targetPositions= this.targetPositions.filter(pos=>{
+        //     let orgPiece= boardPieces[pos]; 
+        //     boardPieces[pos]= king;
+        //     boardPieces[currentPosition]= null;
+        //     let dangMoves= this.checkForCheck(boardPieces, 'king', this.color);
+        //     if(dangMoves.at){
+        //         console.log('will check at ', dangMoves.at, ' by ', dangMoves.by.piece);
+        //         // don't add to savemoves
+        //     } else {
+        //         boardPieces[pos]= orgPiece;
+        //         return pos;
+        //     }
+        //     boardPieces[pos]= orgPiece;
+        // })
+        // boardPieces[currentPosition]= king;
         return this.targetPositions;
         
     }
