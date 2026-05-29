@@ -204,7 +204,7 @@ path{
     content: "";
     position: absolute;
     inset: 0;
-    background-color: rgb(91 93 170 / 70%);
+    background-color: rgba(171, 188, 39, 0.534);
     pointer-events: none;
     z-index: 0;
 }
@@ -213,7 +213,7 @@ path{
     content: "";
     position: absolute;
     inset: 0;
-    background-color: rgb(60 69 142 / 70%);;
+    background-color: rgba(171, 188, 39, 0.534);
     pointer-events: none;
     z-index: 0;
 }

@@ -28,7 +28,7 @@ class Piece{
         boardPieces.forEach((chessPiece, i)=>{
             if(!chessPiece || chessPiece.color== checkColor || chessPiece.piece== 'king') return;
             
-            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
+            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, true) : chessPiece.validMove(i, boardPieces);
             if(tempTargets.length== 0) return;
 
             if(tempTargets.includes(checkIdx)) underAttack= true;
@@ -36,20 +36,7 @@ class Piece{
 
         return underAttack;
     }
-    // Attacked(boardPieces, checkColor, checkIdx){
-    //     let attackedBy= [];
-
-    //     boardPieces.forEach((chessPiece, i)=>{
-    //         if(!chessPiece || chessPiece.color== checkColor || chessPiece.piece== 'king' ) return;
-            
-    //         let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
-    //         if(tempTargets.length== 0) return;
-
-    //         if(tempTargets.includes(checkIdx)) attackedBy.push(chessPiece);
-    //     })
-
-    //     return attackedBy;
-    // }
+    
     checkPin(boardPieces, king, kingColor){
         
         let attacked= false;
@@ -79,19 +66,20 @@ class Piece{
             by: [],
             at: null
         };
-        console.log('checking for check on ', king, ' of color ', kingColor);
+
         boardPieces.forEach((chessPiece, i)=>{ //white
 
             if(!chessPiece || chessPiece.piece== 'king' || chessPiece.color==kingColor) return; // if null
             
-            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, 'true') : chessPiece.validMove(i, boardPieces);
+            let tempTargets= chessPiece.piece== 'pawn'? chessPiece.takeMove(i, boardPieces, false) : chessPiece.validMove(i, boardPieces);
             if(tempTargets.length== 0) return;
-            console.log('checking piece ', chessPiece.piece, 'of color ', chessPiece.color, ' at ', i, ' with targets ', tempTargets);
+            
             for(let j= 0; j< tempTargets.length; j++){
                 let target= tempTargets[j];
                 if(boardPieces[target] && boardPieces[target].piece == king && boardPieces[target].color== kingColor){
-                    check.by.push(chessPiece);
+                    check.by.push(i);
                     check.at= target;
+                    console.log('check by: ', check.by , 'at: ', target);
                 }
             }
 
@@ -99,15 +87,12 @@ class Piece{
         return check;
     }
 
-
-
-
     findBlockPositions(checkInfo, boardPieces) {
         // Returns squares where a piece can block the check
         let blockSquares = [];
         if (checkInfo.by.length > 1) return blockSquares;
 
-        let checkedBy = checkInfo.by[0]; // Only ranged pieces can be blocked
+        let checkedBy = boardPieces[checkInfo.by[0]]; // Only ranged pieces can be blocked
         let kingPos = checkInfo.at;
         
         // Only rook, bishop, queen can be blocked
@@ -117,7 +102,6 @@ class Piece{
         
         let checkerPos = boardPieces.indexOf(checkedBy);
         let blockPath = this.getPathBetween(checkerPos, kingPos, boardPieces);
-        
         return blockPath;
     }
     
@@ -146,50 +130,7 @@ class Piece{
         return path;
     }
 
-    // captureChecker(checkedbys, boardPieces) {
-    //     let captureInfo = [];
-    //     let capturePiece;
-
-    //     checkedbys.forEach(checkedby => {
-    //         capturePiece = checkedby.piece;
-    //         let captureAt = boardPieces.indexOf(checkedby);
-    //         let reqColor = checkedby.color;
-    //         captureInfo= (this.checkForCheck(boardPieces, capturePiece, reqColor).by);
-    //     });
-
-    //     return captureInfo;
-    // }
-//     escapeCheck(checkInfo, boardPieces){
-       
-//         let savemoves= [];
-//         let KingPosition= checkInfo.at; // index
-//         let king= boardPieces[KingPosition];
-//         let checkedBy= checkInfo.by; //piece
-        
-//         let possibleMoves= King.prototype.validMove(KingPosition, boardPieces);
-
-//         possibleMoves.forEach(move=>{
-//             //internally placing king there
-//             let orgPiece= boardPieces[move]; 
-//             boardPieces[move]= king;
-//             boardPieces[KingPosition]= null;
-
-//             let dangMoves= this.checkForCheck(boardPieces, 'king', king.color);
-//             if(dangMoves.at){
-//                 console.log('will check at ', dangMoves.at, ' by ', dangMoves.by);
-//                 // don't add to savemoves
-//             } else {
-//                 savemoves.push(move);
-//             }
-//             boardPieces[move]= orgPiece;
-//         })
-//         boardPieces[KingPosition]= king;
-//         if(savemoves.length== 0) 
-//             return false;
-//         else 
-//             return savemoves;
-
-//     }
+   
  }
 
 class Pawn extends Piece{
